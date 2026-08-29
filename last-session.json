@@ -1,0 +1,40 @@
+﻿{
+    "At":  "2026-08-29 11:50:15",
+    "Apps":  [
+                 {
+                     "Name":  "chrome",
+                     "Title":  "GitHub - Google Chrome",
+                     "Path":  "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+                 },
+                 {
+                     "Name":  "Code",
+                     "Title":  "Blackjack 24 ปรับเรทการอ… - mmorpg-bot-manager - Visual Studio Code",
+                     "Path":  "C:\\Users\\watch\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
+                 },
+                 {
+                     "Name":  "Discord",
+                     "Title":  "@Gryffindor 1000 point - Discord",
+                     "Path":  "C:\\Users\\watch\\AppData\\Local\\Discord\\app-1.0.9255\\Discord.exe"
+                 },
+                 {
+                     "Name":  "GitHubDesktop",
+                     "Title":  "GitHub Desktop",
+                     "Path":  "C:\\Users\\watch\\AppData\\Local\\GitHubDesktop\\app-3.6.4\\GitHubDesktop.exe"
+                 },
+                 {
+                     "Name":  "msedge",
+                     "Title":  "เล่นเกม — Fragment Rift และอีก 1 เพจ - ส่วนบุคคล 2 - Microsoft​ Edge",
+                     "Path":  "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
+                 },
+                 {
+                     "Name":  "pythonw3.12",
+                     "Title":  "License Server / Key Generator",
+                     "Path":  "C:\\Program Files\\WindowsApps\\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\\pythonw3.12.exe"
+                 },
+                 {
+                     "Name":  "WindowsTerminal",
+                     "Title":  "◑ Claude Code บนเครื่อง vs extension บนบราวเซอร์",
+                     "Path":  "C:\\Program Files\\WindowsApps\\Microsoft.WindowsTerminal_1.24.11911.0_x64__8wekyb3d8bbwe\\WindowsTerminal.exe"
+                 }
+             ]
+}

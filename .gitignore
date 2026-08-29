@@ -1,0 +1,7 @@
+node_modules/
+__pycache__/
+.env
+*.log
+Thumbs.db
+desktop.ini
+.edge-carao*/

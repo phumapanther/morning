@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>CARAO</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #030812; }
+  body { font-family: 'Segoe UI', 'Leelawadee UI', sans-serif; color: #7fdfff; }
+  canvas { position: absolute; inset: 0; }
+  #hud { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; z-index: 2; }
+  #title { font-size: 8vmin; letter-spacing: 1.2vmin; font-weight: 200; color: #aeeaff; text-shadow: 0 0 18px #00c8ff, 0 0 60px #0080ff; opacity: 0; animation: fadein 1.2s .4s forwards; }
+  #sub { font-size: 2vmin; letter-spacing: .8vmin; color: #3fa9d8; margin-top: 1vmin; opacity: 0; animation: fadein 1.2s 1s forwards; }
+  #welcome { font-size: 3vmin; margin-top: 3.5vmin; color: #d6f6ff; opacity: 0; text-shadow: 0 0 14px #00d0ff; }
+  #welcome.show { animation: fadein 1s forwards; }
+  #cmdwrap { margin-top: 3vmin; opacity: 0; display: flex; flex-direction: column; align-items: center; gap: 1.4vmin; }
+  #cmdwrap.show { animation: fadein 1s forwards; }
+  #cmd { width: 46vmin; max-width: 80vw; padding: 1.6vmin 2.4vmin; font-size: 2.4vmin; text-align: center; color: #d6f6ff;
+         background: rgba(0, 40, 70, .35); border: 1px solid #1f7fae; border-radius: 999px; outline: none;
+         box-shadow: 0 0 18px rgba(0, 170, 255, .25), inset 0 0 12px rgba(0, 170, 255, .12); caret-color: #7fdfff; }
+  #cmd::placeholder { color: #4796bd; }
+  #cmd:focus { border-color: #4fc3f7; box-shadow: 0 0 26px rgba(0, 190, 255, .45), inset 0 0 12px rgba(0, 170, 255, .18); }
+  #micline { font-size: 1.9vmin; color: #58b6dd; display: flex; align-items: center; gap: 1vmin; }
+  #dot { width: 1.2vmin; height: 1.2vmin; border-radius: 50%; background: #245; }
+  #dot.on { background: #ff5d5d; box-shadow: 0 0 10px #ff5d5d; animation: pulse 1.6s infinite; }
+  #heard { font-size: 1.8vmin; color: #3fa9d8; min-height: 2.4vmin; font-style: italic; }
+  #boot { position: absolute; left: 4vmin; bottom: 4vmin; font-family: Consolas, monospace; font-size: 1.7vmin; color: #49c3ef; text-align: left; text-shadow: 0 0 8px #0af; z-index: 2; }
+  #boot div { opacity: 0; animation: fadein .3s forwards; }
+  #scan { position: absolute; inset: 0; z-index: 3; pointer-events: none; background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 180, 255, .03) 2px 4px); }
+  #flash { position: absolute; inset: 0; z-index: 4; background: #bfefff; opacity: 0; pointer-events: none; }
+  .boomflash { animation: boom .5s forwards; }
+  @keyframes fadein { to { opacity: 1; } }
+  @keyframes pulse { 0%, 100% { opacity: .4; } 50% { opacity: 1; } }
+  @keyframes boom { 0% { opacity: .9; } 100% { opacity: 0; } }
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas>
+<div id="hud">
+  <div id="title">C A R A O</div>
+  <div id="sub">Claudew Ai Run Automatic Option</div>
+  <div id="welcome"></div>
+  <div id="cmdwrap">
+    <input id="cmd" type="text" placeholder='พิมพ์ "อรุณสวัสดิ์" หรือ "สวัสดี" แล้วกด Enter' autocomplete="off">
+    <div id="micline"><span id="dot"></span><span id="micstat">ไมโครโฟน: กำลังเริ่ม...</span></div>
+    <div id="heard"></div>
+  </div>
+</div>
+<div id="boot"></div>
+<div id="scan"></div>
+<div id="flash"></div>
+<script>
+// ?mirror=1 = จอรอง: โชว์เอฟเฟกต์อย่างเดียว ไม่มีเสียง/ไมค์/ช่องพิมพ์ (กันเสียงซ้อนสองจอ)
+const MIRROR = location.search.includes('mirror');
+const cv = document.getElementById('fx'), cx = cv.getContext('2d');
+function fit() { cv.width = innerWidth; cv.height = innerHeight; }
+fit(); addEventListener('resize', fit);
+
+let t = 0;
+function draw() {
+  const w = cv.width, h = cv.height, R = Math.min(w, h) * .33;
+  cx.clearRect(0, 0, w, h);
+  cx.save(); cx.translate(w / 2, h / 2);
+  for (let ring = 0; ring < 4; ring++) {
+    const r = R * (.55 + ring * .18), dir = ring % 2 ? 1 : -1, seg = 5 + ring * 2;
+    cx.strokeStyle = `rgba(0,${170 + ring * 20},255,${.5 - ring * .09})`;
+    cx.lineWidth = ring === 0 ? 3 : 1.5;
+    for (let s = 0; s < seg; s++) {
+      const a0 = dir * t * (.2 + ring * .07) + s * 2 * Math.PI / seg;
+      cx.beginPath(); cx.arc(0, 0, r, a0, a0 + Math.PI / seg); cx.stroke();
+    }
+  }
+  const a = t * .8;
+  cx.fillStyle = '#bfefff'; cx.shadowColor = '#00d0ff'; cx.shadowBlur = 16;
+  cx.beginPath(); cx.arc(Math.cos(a) * R * 1.09, Math.sin(a) * R * 1.09, 4, 0, 7); cx.fill();
+  cx.restore();
+  t += .016;
+  requestAnimationFrame(draw);
+}
+draw();
+
+const lines = [
+  'CARAO v2.0 — initializing...',
+  'ตรวจสอบตัวตน: watch — ยืนยันแล้ว ✓',
+  'โหลดโพรไฟล์เช้าวันทำงาน ✓',
+  'Claude Code: standby (เบื้องหลัง) ✓',
+  'ระบบเสียง: online ✓',
+  'รอคำสั่งเริ่มระบบ — STANDING BY',
+];
+const boot = document.getElementById('boot');
+lines.forEach((l, i) => setTimeout(() => {
+  const d = document.createElement('div'); d.textContent = '> ' + l; boot.appendChild(d);
+}, 700 + i * 500));
+
+// สำคัญ: ข้อความที่ให้ AI พูด ห้ามมีคำทริกเกอร์ (อรุณสวัสดิ์/สวัสดี) — ไม่งั้นไมค์ได้ยินแล้วทักตัวเอง
+function say(msg, fallback, onDone) {
+  try {
+    const u = new SpeechSynthesisUtterance(msg);
+    if (onDone) { u.onend = onDone; u.onerror = onDone; }
+    const pick = () => {
+      const v = speechSynthesis.getVoices();
+      u.voice = v.find(x => x.lang === 'th-TH' && x.name.includes('Online')) || v.find(x => x.lang === 'th-TH') || null;
+      if (!u.voice && fallback) u.text = fallback;
+      speechSynthesis.speak(u);
+    };
+    if (speechSynthesis.getVoices().length) pick();
+    else speechSynthesis.onvoiceschanged = pick;
+  } catch (e) { if (onDone) onDone(); }
+}
+
+// ---- ต้อนรับ ----
+setTimeout(() => {
+  document.getElementById('flash').classList.add('boomflash');
+  const w = document.getElementById('welcome');
+  if (MIRROR) {
+    w.textContent = 'ระบบพร้อมทำงาน — สั่งงานได้ที่จอหลัก';
+    w.classList.add('show');
+    return;
+  }
+  w.textContent = 'ยินดีต้อนรับครับ — พูดหรือพิมพ์ "อรุณสวัสดิ์" เพื่อเริ่มระบบทั้งหมด';
+  w.classList.add('show');
+  document.getElementById('cmdwrap').classList.add('show');
+  document.getElementById('cmd').focus();
+  // เริ่มเปิดไมค์หลังพูดจบเท่านั้น กันได้ยินเสียงตัวเอง
+  say('ยินดีต้อนรับครับ ระบบคาเรา พร้อมทำงานแล้ว บอกคำทักทายตอนเช้า เพื่อเริ่มวันของคุณครับ', 'Welcome back. CARAO standing by.', startListening);
+  setTimeout(() => { if (!listening && !fired) startListening(); }, 12000); // เผื่อ TTS เจ๊ง ก็ยังเปิดไมค์
+}, 4000);
+
+// ---- ทริกเกอร์ ----
+const TRIG = /อรุณสวัส|สวัสดี|good ?morning|sawasdee/i;
+let fired = false;
+function fire() {
+  if (fired) return; fired = true;
+  try { rec && rec.stop(); } catch (e) {}
+  document.getElementById('flash').classList.add('boomflash');
+  document.getElementById('welcome').textContent = 'รับทราบ — กำลังเปิดระบบทั้งหมด ALL SYSTEMS GO';
+  document.getElementById('cmd').disabled = true;
+  say('รับทราบครับ กำลังเปิดระบบทั้งหมด ขอให้เป็นวันที่ดีครับ', 'All systems go.');
+  fetch('http://127.0.0.1:8930/morning', { mode: 'no-cors' }).catch(() => {});
+  setTimeout(() => window.close(), 6000); // เผื่อปิดเองไม่ได้ เซิร์ฟเวอร์จะปิดหน้าต่างให้แทน
+}
+const cmd = document.getElementById('cmd');
+cmd.addEventListener('keydown', e => { if (e.key === 'Enter' && TRIG.test(cmd.value)) fire(); });
+
+// ---- ฟังเสียงในหน้า (Web Speech API) ----
+const dot = document.getElementById('dot'), stat = document.getElementById('micstat'), heard = document.getElementById('heard');
+let rec = null, listening = false;
+function startListening() {
+  if (listening || fired) return;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { stat.textContent = 'ไมโครโฟน: เบราว์เซอร์ไม่รองรับ ใช้พิมพ์แทน'; return; }
+  listening = true;
+  rec = new SR();
+  rec.lang = 'th-TH'; rec.continuous = true; rec.interimResults = false;
+  rec.onstart = () => { dot.classList.add('on'); stat.textContent = 'ไมโครโฟน: กำลังฟัง...'; };
+  rec.onresult = ev => {
+    const txt = Array.from(ev.results).map(r => r[0].transcript).join(' ');
+    heard.textContent = '"' + txt.slice(-60) + '"';
+    if (TRIG.test(txt)) fire();
+  };
+  rec.onerror = () => { dot.classList.remove('on'); stat.textContent = 'ไมโครโฟน: ขัดข้อง ใช้พิมพ์แทนได้'; };
+  rec.onend = () => { if (!fired) { try { rec.start(); } catch (e) {} } };
+  try { rec.start(); } catch (e) { stat.textContent = 'ไมโครโฟน: เปิดไม่ได้ ใช้พิมพ์แทน'; }
+}
+</script>
+</body>
+</html>
